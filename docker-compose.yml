@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: google-forms-clone-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: GoogleFormsClone
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - google-forms-network
+
+  backend:
+    build:
+      context: ./backend/GoogleFormsClone.API
+      dockerfile: Dockerfile
+    container_name: google-forms-clone-backend
+    restart: always
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoDbSettings__DatabaseName=GoogleFormsClone
+    depends_on:
+      - mongodb
+    networks:
+      - google-forms-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: google-forms-clone-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - google-forms-network
+
+networks:
+  google-forms-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
