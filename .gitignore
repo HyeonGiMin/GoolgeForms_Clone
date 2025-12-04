@@ -1,0 +1,31 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+.vs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Node
+node_modules/
+dist/
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

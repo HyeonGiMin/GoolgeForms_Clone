@@ -1,0 +1,50 @@
+## General
+- **language**: 모든 답변은 기본적으로 한국어로 작성합니다. (필요 시 코드/명령어는 원어 그대로 사용)
+- **project_root**: 이 규칙은 `GoolgeForms_Clone` 레포 전체에 적용합니다.
+
+## Project Overview
+- **프로젝트 이름**: Google Forms Clone
+- **목표**: Google Forms와 유사한 온라인 설문/폼 작성 서비스 구현
+- **구성**:
+  - Frontend: React (SPA, TypeScript 권장)
+  - Backend: ASP.NET (ASP.NET Core Web API 권장)
+- **예상 디렉터리 구조 (권장)**:
+  - `frontend/` : React + TypeScript 앱
+  - `backend/` : ASP.NET Core Web API
+
+## Coding Style
+- **공통**
+  - 폴더/파일/컴포넌트/클래스/함수/변수 이름은 의미가 분명하게 드러나게 짓습니다.
+  - 주석은 한국어로 작성하되, 코드 요소 이름은 영어를 사용합니다.
+  - 불필요하게 복잡한 추상화를 피하고, 읽기 쉬운 코드를 우선합니다.
+- **Frontend (React)**
+  - React + TypeScript 조합을 기본으로 가정합니다.
+  - 함수형 컴포넌트 사용 및 React Hooks 기반으로 작성합니다.
+  - 상태 관리는 추후 결정되기 전까지는 React 기본 state와 context 정도만 사용합니다.
+  - 컴포넌트는 UI/레이아웃과 비즈니스 로직을 가능한 한 분리합니다.
+  - 공용 컴포넌트는 `components/`, 페이지 단위는 `pages/` 등으로 나누는 구조를 선호합니다.
+- **Backend (ASP.NET)**
+  - ASP.NET Core Web API 템플릿을 기준으로 합니다.
+  - Controller / Service / Repository 레이어를 분리하는 구조를 선호합니다.
+  - DTO와 Entity를 구분해서 사용합니다.
+  - 엔드포인트 설계는 RESTful 스타일을 기본으로 합니다.
+
+## Assistant Behavior in Cursor
+- **기본 원칙**
+  - 사용자의 의도를 우선적으로 해석하고, 애매하면 짧게 한국어로 되묻습니다.
+  - 설명이 길어질 경우, 먼저 요약을 제공하고 필요 시 세부 내용을 추가로 제공하는 방식을 사용합니다.
+  - 실제 코드 수정이 필요한 경우, 우선 코드 변경을 적용한 뒤 요약을 제공합니다.
+- **코드 제안**
+  - 기존 코드 스타일(네이밍, 들여쓰기, 파일 구조 등)을 우선적으로 따릅니다.
+  - 새로운 파일을 만들 때는 해당 파일의 역할을 한 줄 정도 주석으로 명시합니다.
+  - Frontend/Backend 각각에 대해, 현재 레포의 디렉터리 구조를 우선적으로 재사용합니다.
+
+## Git & 협업
+- **커밋 메시지**
+  - 한국어/영어 혼용 가능하나, 한 커밋에서는 일관성을 유지합니다.
+  - 형식 예시:
+    - `feat(frontend): add form builder page`
+    - `fix(backend): validate form response dto`
+- **브랜치 네이밍**
+  - 예시: `feature/frontend-form-builder`, `feature/backend-response-api`, `fix/frontend-validation` 등
+
