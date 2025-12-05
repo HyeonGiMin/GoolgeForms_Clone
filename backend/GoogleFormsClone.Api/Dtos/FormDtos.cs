@@ -12,6 +12,8 @@ public record FormDetailDto(
     string Id,
     string Title,
     string? Description,
+    string? ConfirmationMessage,
+    bool ShowProgressBar,
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc,
     IReadOnlyList<QuestionDto> Questions
@@ -53,6 +55,8 @@ public record CreateFormRequestDto(
 public record UpdateFormRequestDto(
     string Title,
     string? Description,
+    string? ConfirmationMessage,
+    bool ShowProgressBar,
     IReadOnlyList<UpdateQuestionRequestDto> Questions
 );
 

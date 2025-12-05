@@ -172,10 +172,11 @@ export const FormAnswerPage = () => {
             await submitResponse(id, payload);
             setSubmitSuccess(true);
 
-            // 3초 후 폼 목록으로 이동
+            // confirmationMessage가 있으면 표시 후 이동, 없으면 바로 이동
+            const delay = form.confirmationMessage ? 5000 : 3000;
             setTimeout(() => {
                 navigate("/forms");
-            }, 3000);
+            }, delay);
         } catch (err) {
             console.error(err);
             setError("응답을 제출하지 못했습니다. 다시 시도해주세요.");
@@ -213,9 +214,32 @@ export const FormAnswerPage = () => {
     if (submitSuccess) {
         return (
             <section className="p-4">
-                <div className="alert alert-success">
-                    <h4>응답이 제출되었습니다! 감사합니다.</h4>
-                    <p className="mb-0">잠시 후 설문 목록으로 이동합니다...</p>
+                <div className="d-flex flex-column justify-content-center align-items-center min-vh-100">
+                    <div className="text-center" style={{ maxWidth: "500px" }}>
+                        <div className="mb-4">
+                            <i
+                                className="bi bi-check-circle-fill"
+                                style={{ fontSize: "4rem", color: "#28a745" }}
+                            />
+                        </div>
+                        <h2 className="mb-3">응답이 제출되었습니다!</h2>
+                        {form.confirmationMessage && (
+                            <Card className="mb-4 border-success">
+                                <Card.Body>
+                                    <p className="mb-0">{form.confirmationMessage}</p>
+                                </Card.Body>
+                            </Card>
+                        )}
+                        <p className="text-muted mb-4">
+                            잠시 후 설문 목록으로 이동합니다...
+                        </p>
+                        <Button
+                            variant="primary"
+                            onClick={() => navigate("/forms")}
+                        >
+                            지금 이동
+                        </Button>
+                    </div>
                 </div>
             </section>
         );
@@ -285,10 +309,10 @@ export const FormAnswerPage = () => {
 };
 
 interface QuestionRendererProps {
-    question: Question;
-    answer?: Answer;
-    onTextChange: (value: string) => void;
-    onOptionChange: (option: string, isCheckbox: boolean) => void;
+    readonly question: Question;
+    readonly answer?: Answer;
+    readonly onTextChange: (value: string) => void;
+    readonly onOptionChange: (option: string, isCheckbox: boolean) => void;
 }
 
 function QuestionRenderer({

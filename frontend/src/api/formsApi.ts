@@ -30,6 +30,8 @@ export type FormDetail = {
     createdAtUtc: string;
     updatedAtUtc?: string | null;
     questions: Question[];
+    confirmationMessage?: string | null;
+    showProgressBar?: boolean;
 };
 
 export type QuestionType =

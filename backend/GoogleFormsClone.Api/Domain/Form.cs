@@ -14,6 +14,10 @@ public class Form
 
     public string? Description { get; set; }
 
+    public string? ConfirmationMessage { get; set; }
+
+    public bool ShowProgressBar { get; set; } = false;
+
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAtUtc { get; set; }

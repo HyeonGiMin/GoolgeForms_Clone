@@ -37,7 +37,16 @@ public class FormService(IFormRepository formRepository) : IFormService
             ))
             .ToList();
 
-        return new FormDetailDto(form.Id.ToString(), form.Title, form.Description, form.CreatedAtUtc, form.UpdatedAtUtc, questionDtos);
+        return new FormDetailDto(
+            form.Id.ToString(),
+            form.Title,
+            form.Description,
+            form.ConfirmationMessage,
+            form.ShowProgressBar,
+            form.CreatedAtUtc,
+            form.UpdatedAtUtc,
+            questionDtos
+        );
     }
 
     public async Task<FormSummaryDto> CreateAsync(CreateFormRequestDto request, CancellationToken cancellationToken = default)
@@ -76,6 +85,8 @@ public class FormService(IFormRepository formRepository) : IFormService
         // 기존 폼 업데이트
         existing.Title = request.Title;
         existing.Description = request.Description;
+        existing.ConfirmationMessage = request.ConfirmationMessage;
+        existing.ShowProgressBar = request.ShowProgressBar;
         existing.Questions = request.Questions
             .Select(q => new Question
             {
@@ -107,7 +118,16 @@ public class FormService(IFormRepository formRepository) : IFormService
             ))
             .ToList();
 
-        return new FormDetailDto(updated.Id.ToString(), updated.Title, updated.Description, updated.CreatedAtUtc, updated.UpdatedAtUtc, questionDtos);
+        return new FormDetailDto(
+            updated.Id.ToString(),
+            updated.Title,
+            updated.Description,
+            updated.ConfirmationMessage,
+            updated.ShowProgressBar,
+            updated.CreatedAtUtc,
+            updated.UpdatedAtUtc,
+            questionDtos
+        );
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
