@@ -19,7 +19,7 @@ public class FormsController(IFormService formService) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<FormSummaryDto>> GetFormById(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<FormDetailDto>> GetFormById(Guid id, CancellationToken cancellationToken)
     {
         var form = await _formService.GetByIdAsync(id, cancellationToken);
 
@@ -42,6 +42,38 @@ public class FormsController(IFormService formService) : ControllerBase
 
         var created = await _formService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetFormById), new { id = created.Id }, created);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<FormDetailDto>> UpdateForm(Guid id, [FromBody] UpdateFormRequestDto request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            ModelState.AddModelError(nameof(request.Title), "Title은 필수 값입니다.");
+            return ValidationProblem(ModelState);
+        }
+
+        var updated = await _formService.UpdateAsync(id, request, cancellationToken);
+
+        if (updated is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(updated);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteForm(Guid id, CancellationToken cancellationToken)
+    {
+        var deleted = await _formService.DeleteAsync(id, cancellationToken);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 }
 

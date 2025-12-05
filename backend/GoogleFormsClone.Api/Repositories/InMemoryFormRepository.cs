@@ -27,6 +27,32 @@ public class InMemoryFormRepository : IFormRepository
         _forms.Add(form);
         return Task.FromResult(form);
     }
+
+    public Task<Form?> UpdateAsync(Form form, CancellationToken cancellationToken = default)
+    {
+        var existing = _forms.FirstOrDefault(f => f.Id == form.Id);
+
+        if (existing is null)
+            return Task.FromResult<Form?>(null);
+
+        form.UpdatedAtUtc = DateTime.UtcNow;
+
+        var index = _forms.IndexOf(existing);
+        _forms[index] = form;
+
+        return Task.FromResult<Form?>(form);
+    }
+
+    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var form = _forms.FirstOrDefault(f => f.Id == id);
+
+        if (form is null)
+            return Task.FromResult(false);
+
+        _forms.Remove(form);
+        return Task.FromResult(true);
+    }
 }
 
 

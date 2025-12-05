@@ -1,6 +1,18 @@
 // .env 파일 로드 (개발 환경)
 DotNetEnv.Env.Load();
 
+// MongoDB BsonClassMap 등록
+MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<GoogleFormsClone.Api.Domain.FormResponse>(cm =>
+{
+    cm.AutoMap();
+    cm.MapIdMember(c => c.Id);
+});
+
+MongoDB.Bson.Serialization.BsonClassMap.RegisterClassMap<GoogleFormsClone.Api.Domain.ResponseAnswer>(cm =>
+{
+    cm.AutoMap();
+});
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -28,7 +40,9 @@ builder.Services.AddCors(options =>
 // MongoDB 컨텍스트 및 Repository DI 등록
 builder.Services.AddSingleton<GoogleFormsClone.Api.Persistence.MongoDbContext>();
 builder.Services.AddScoped<GoogleFormsClone.Api.Repositories.IFormRepository, GoogleFormsClone.Api.Repositories.MongoFormRepository>();
+builder.Services.AddScoped<GoogleFormsClone.Api.Repositories.IFormResponseRepository, GoogleFormsClone.Api.Repositories.MongoFormResponseRepository>();
 builder.Services.AddScoped<GoogleFormsClone.Api.Services.IFormService, GoogleFormsClone.Api.Services.FormService>();
+builder.Services.AddScoped<GoogleFormsClone.Api.Services.IFormResponseService, GoogleFormsClone.Api.Services.FormResponseService>();
 
 var app = builder.Build();
 

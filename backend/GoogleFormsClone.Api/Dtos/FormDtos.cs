@@ -2,10 +2,19 @@
 namespace GoogleFormsClone.Api.Dtos;
 
 public record FormSummaryDto(
-    Guid Id,
+    string Id,
     string Title,
     string? Description,
     DateTime CreatedAtUtc
+);
+
+public record FormDetailDto(
+    string Id,
+    string Title,
+    string? Description,
+    DateTime CreatedAtUtc,
+    DateTime? UpdatedAtUtc,
+    IReadOnlyList<QuestionDto> Questions
 );
 
 public record QuestionOptionDto(
@@ -28,9 +37,22 @@ public record CreateQuestionRequestDto(
     IReadOnlyList<string> Options
 );
 
+public record UpdateQuestionRequestDto(
+    string Title,
+    string Type,
+    bool Required,
+    IReadOnlyList<string> Options
+);
+
 public record CreateFormRequestDto(
     string Title,
     string? Description,
     IReadOnlyList<CreateQuestionRequestDto> Questions
+);
+
+public record UpdateFormRequestDto(
+    string Title,
+    string? Description,
+    IReadOnlyList<UpdateQuestionRequestDto> Questions
 );
 

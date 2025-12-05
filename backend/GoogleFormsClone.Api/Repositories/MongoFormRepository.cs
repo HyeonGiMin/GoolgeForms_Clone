@@ -37,6 +37,29 @@ public class MongoFormRepository : IFormRepository
         await _collection.InsertOneAsync(form, cancellationToken: cancellationToken);
         return form;
     }
+
+    public async Task<Form?> UpdateAsync(Form form, CancellationToken cancellationToken = default)
+    {
+        form.UpdatedAtUtc = DateTime.UtcNow;
+
+        var result = await _collection.ReplaceOneAsync(
+            f => f.Id == form.Id,
+            form,
+            cancellationToken: cancellationToken
+        );
+
+        return result.ModifiedCount > 0 ? form : null;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var result = await _collection.DeleteOneAsync(
+            f => f.Id == id,
+            cancellationToken: cancellationToken
+        );
+
+        return result.DeletedCount > 0;
+    }
 }
 
 

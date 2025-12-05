@@ -8,6 +8,8 @@ public interface IFormRepository
     Task<IReadOnlyList<Form>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<Form?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Form> AddAsync(Form form, CancellationToken cancellationToken = default);
+    Task<Form?> UpdateAsync(Form form, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 
