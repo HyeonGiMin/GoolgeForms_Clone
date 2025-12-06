@@ -226,7 +226,9 @@ export const FormAnswerPage = () => {
                         {form.confirmationMessage && (
                             <Card className="mb-4 border-success">
                                 <Card.Body>
-                                    <p className="mb-0">{form.confirmationMessage}</p>
+                                    <p className="mb-0">
+                                        {form.confirmationMessage}
+                                    </p>
                                 </Card.Body>
                             </Card>
                         )}

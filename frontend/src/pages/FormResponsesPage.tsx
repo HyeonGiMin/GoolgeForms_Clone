@@ -252,7 +252,6 @@ interface ResponseSummaryProps {
 }
 
 const ResponseSummary = ({ responses, form }: ResponseSummaryProps) => {
-
     return (
         <div className="card mb-4">
             <div className="card-body">
@@ -283,8 +282,7 @@ const ResponseSummary = ({ responses, form }: ResponseSummaryProps) => {
                             <div className="h3 text-info mb-1">
                                 {responses.length > 0 && responses.at(-1)
                                     ? new Date(
-                                          responses.at(-1)!
-                                              .createdAt,
+                                          responses.at(-1)!.createdAt,
                                       ).toLocaleDateString("ko-KR")
                                     : "-"}
                             </div>
@@ -334,8 +332,8 @@ const ResponseByQuestion = ({ responses, form }: ResponseByQuestionProps) => {
                                         >
                                             <div className="flex-grow-1">
                                                 {answer?.selectedOptions &&
-                                                answer.selectedOptions
-                                                    .length > 0 ? (
+                                                answer.selectedOptions.length >
+                                                    0 ? (
                                                     <div>
                                                         {answer.selectedOptions.map(
                                                             (opt) => (
@@ -466,10 +464,7 @@ const ResponseIndividual = ({
 
 // ============ Export 유틸 함수 ============
 
-function convertToCSV(
-    responses: FormResponseDto[],
-    questions: any[],
-): string {
+function convertToCSV(responses: FormResponseDto[], questions: any[]): string {
     const headers = [
         "응답 번호",
         "응답 시간",
@@ -480,9 +475,7 @@ function convertToCSV(
         idx + 1,
         new Date(response.createdAt).toLocaleString("ko-KR"),
         ...questions.map((q) => {
-            const answer = response.answers.find(
-                (a) => a.questionId === q.id,
-            );
+            const answer = response.answers.find((a) => a.questionId === q.id);
             if (answer?.selectedOptions && answer.selectedOptions.length > 0) {
                 return answer.selectedOptions.join("; ");
             }
@@ -493,7 +486,12 @@ function convertToCSV(
     const csvContent = [
         headers.map((h) => `"${h}"`).join(","),
         ...rows.map((r) =>
-            r.map((cell) => `"${cell?.toString().replaceAll('"', '""') || ""}"`).join(","),
+            r
+                .map(
+                    (cell) =>
+                        `"${cell?.toString().replaceAll('"', '""') || ""}"`,
+                )
+                .join(","),
         ),
     ].join("\n");
 
@@ -514,4 +512,4 @@ function downloadCSV(csvContent: string, filename: string) {
     document.body.appendChild(link);
     link.click();
     link.remove();
-};
+}
