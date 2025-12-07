@@ -10,28 +10,43 @@ type AppLayoutProps = {
 export const AppLayout = ({ children }: AppLayoutProps) => {
     return (
         <div className="app-root">
-            <Navbar bg="light" expand="sm" className="shadow-sm mb-3">
-                <Container fluid>
-                    <Navbar.Brand as={Link} to="/forms">
-                        Google Forms Clone
+            <Navbar bg="white" expand="lg" className="shadow-sm border-bottom">
+                <Container fluid className="px-3 px-lg-4">
+                    <Navbar.Brand
+                        as={Link}
+                        to="/forms"
+                        className="fw-bold"
+                        style={{ color: "#673ab7", fontSize: "1.25rem" }}
+                    >
+                        📋 Google Forms Clone
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="main-navbar" />
                     <Navbar.Collapse
                         id="main-navbar"
                         className="justify-content-end"
                     >
-                        <Nav>
-                            <Nav.Link as={NavLink} to="/forms">
-                                Forms
+                        <Nav className="gap-2">
+                            <Nav.Link
+                                as={NavLink}
+                                to="/forms"
+                                className="px-3 py-2 rounded"
+                            >
+                                📁 내 폼
                             </Nav.Link>
-                            <Nav.Link as={NavLink} to="/forms/new">
-                                New Form
+                            <Nav.Link
+                                as={NavLink}
+                                to="/forms/new"
+                                className="px-3 py-2 rounded"
+                            >
+                                ➕ 새 폼
                             </Nav.Link>
                         </Nav>
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-            <Container className="app-main pb-4">{children}</Container>
+            <Container fluid className="app-main px-3 px-lg-4">
+                {children}
+            </Container>
         </div>
     );
 };

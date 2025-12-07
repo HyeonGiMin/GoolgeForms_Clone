@@ -34,16 +34,23 @@ export const FormListPage = () => {
     };
 
     return (
-        <section className="p-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
+        <section>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
                 <div>
-                    <h1 className="h4 mb-1">My Forms</h1>
+                    <h1 className="h3 mb-2 fw-bold">내 설문지</h1>
                     <p className="text-muted mb-0">
                         생성한 설문 폼들을 한눈에 확인하고 관리할 수 있습니다.
                     </p>
                 </div>
                 <Link to="/forms/new">
-                    <Button variant="primary">새 폼 만들기</Button>
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        className="d-flex align-items-center gap-2"
+                    >
+                        <span>➕</span>
+                        <span>새 폼 만들기</span>
+                    </Button>
                 </Link>
             </div>
 
@@ -69,48 +76,62 @@ export const FormListPage = () => {
             )}
 
             {!loading && !error && forms.length > 0 && (
-                <Row xs={1} md={2} lg={3} className="g-3 mt-1">
+                <Row xs={1} md={2} lg={3} xl={4} className="g-4">
                     {forms.map((form) => (
                         <Col key={form.id}>
-                            <Card className="h-100 shadow-sm">
-                                <Card.Body>
-                                    <Card.Title className="h6">
-                                        {form.title}
-                                    </Card.Title>
-                                    {form.description && (
-                                        <Card.Text className="text-muted small mb-3">
-                                            {form.description}
-                                        </Card.Text>
-                                    )}
-                                    <Stack direction="horizontal" gap={2}>
-                                        <Link
-                                            to={`/forms/${form.id}/edit`}
-                                            style={{ flex: 1 }}
-                                        >
-                                            <Button
-                                                variant="outline-primary"
-                                                size="sm"
-                                                className="w-100"
+                            <Card className="h-100 border-0 shadow-sm">
+                                <Card.Body className="d-flex flex-column">
+                                    <div className="mb-3 flex-grow-1">
+                                        <Card.Title className="h5 mb-2 text-truncate">
+                                            {form.title}
+                                        </Card.Title>
+                                        {form.description && (
+                                            <Card.Text
+                                                className="text-muted small mb-0"
+                                                style={{
+                                                    display: "-webkit-box",
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: "vertical",
+                                                    overflow: "hidden",
+                                                }}
                                             >
-                                                편집
-                                            </Button>
-                                        </Link>
-                                        <Link
-                                            to={`/forms/${form.id}/responses`}
-                                            style={{ flex: 1 }}
-                                        >
-                                            <Button
-                                                variant="outline-secondary"
-                                                size="sm"
-                                                className="w-100"
+                                                {form.description}
+                                            </Card.Text>
+                                        )}
+                                    </div>
+                                    <Stack gap={2}>
+                                        <Stack direction="horizontal" gap={2}>
+                                            <Link
+                                                to={`/forms/${form.id}/edit`}
+                                                style={{ flex: 1 }}
                                             >
-                                                응답보기
-                                            </Button>
-                                        </Link>
-                                    </Stack>
-                                    <div className="mt-2">
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    className="w-100"
+                                                >
+                                                    📝 편집
+                                                </Button>
+                                            </Link>
+                                            <Link
+                                                to={`/forms/${form.id}/responses`}
+                                                style={{ flex: 1 }}
+                                            >
+                                                <Button
+                                                    variant="outline-secondary"
+                                                    size="sm"
+                                                    className="w-100"
+                                                >
+                                                    📊 응답
+                                                </Button>
+                                            </Link>
+                                        </Stack>
                                         <Button
-                                            variant="outline-success"
+                                            variant={
+                                                copiedId === form.id
+                                                    ? "success"
+                                                    : "outline-success"
+                                            }
                                             size="sm"
                                             className="w-100"
                                             onClick={() =>
@@ -118,10 +139,10 @@ export const FormListPage = () => {
                                             }
                                         >
                                             {copiedId === form.id
-                                                ? "✓ 복사됨"
-                                                : "공개 링크 복사"}
+                                                ? "✓ 링크 복사됨"
+                                                : "🔗 공유 링크 복사"}
                                         </Button>
-                                    </div>
+                                    </Stack>
                                 </Card.Body>
                             </Card>
                         </Col>

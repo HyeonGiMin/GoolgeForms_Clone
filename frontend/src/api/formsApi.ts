@@ -37,6 +37,7 @@ export type FormDetail = {
 export type QuestionType =
     | "SHORT_TEXT"
     | "LONG_TEXT"
+    | "SINGLE_CHOICE"
     | "MULTIPLE_CHOICE"
     | "CHECKBOXES"
     | "DROPDOWN"

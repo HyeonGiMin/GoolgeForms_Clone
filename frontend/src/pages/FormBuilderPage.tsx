@@ -10,7 +10,15 @@ import {
     type QuestionType,
 } from "../api/formsApi";
 import { useNavigate, useParams } from "react-router-dom";
-import { Badge, Button, Card, Form, Stack, Spinner } from "react-bootstrap";
+import {
+    Alert,
+    Badge,
+    Button,
+    Card,
+    Form,
+    Stack,
+    Spinner,
+} from "react-bootstrap";
 
 type QuestionOption = {
     id: string;
@@ -28,7 +36,8 @@ type Question = {
 const QUESTION_TYPE_LABEL: Record<QuestionType, string> = {
     SHORT_TEXT: "단답형",
     LONG_TEXT: "장문형",
-    MULTIPLE_CHOICE: "객관식",
+    SINGLE_CHOICE: "객관식",
+    MULTIPLE_CHOICE: "다중 선택",
     CHECKBOXES: "체크박스",
     DROPDOWN: "드롭다운",
     DATE: "날짜",
@@ -154,6 +163,7 @@ export const FormBuilderPage = () => {
 
                 // 선택지 타입에서만 options 사용
                 const isOptionType =
+                    type === "SINGLE_CHOICE" ||
                     type === "MULTIPLE_CHOICE" ||
                     type === "CHECKBOXES" ||
                     type === "DROPDOWN";
@@ -251,10 +261,10 @@ export const FormBuilderPage = () => {
     }
 
     return (
-        <section className="p-4">
-            <header className="mb-3">
-                <h1 className="h4 mb-1">
-                    {isEditMode ? "설문지 편집" : "새 설문지"}
+        <section className="py-3">
+            <header className="mb-4">
+                <h1 className="h3 mb-2 fw-bold">
+                    {isEditMode ? "📝 설문지 편집" : "✨ 새 설문지 만들기"}
                 </h1>
                 <p className="text-muted mb-0">
                     {isEditMode
@@ -263,22 +273,28 @@ export const FormBuilderPage = () => {
                 </p>
             </header>
 
-            <Stack gap={3} as="form" onSubmit={handleSubmit}>
-                <Card className="shadow-sm">
-                    <Card.Body>
+            <Stack gap={4} as="form" onSubmit={handleSubmit}>
+                <Card className="border-0 shadow-sm">
+                    <Card.Body className="p-4">
                         <Stack gap={3}>
                             <Form.Group controlId="formTitle">
-                                <Form.Label>제목</Form.Label>
+                                <Form.Label className="fw-semibold">
+                                    제목 *
+                                </Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="설문 폼 제목을 입력하세요"
+                                    placeholder="예: 2024 고객 만족도 설문"
+                                    size="lg"
+                                    required
                                 />
                             </Form.Group>
 
                             <Form.Group controlId="formDescription">
-                                <Form.Label>설명</Form.Label>
+                                <Form.Label className="fw-semibold">
+                                    설명 (선택)
+                                </Form.Label>
                                 <Form.Control
                                     as="textarea"
                                     rows={3}
@@ -286,7 +302,7 @@ export const FormBuilderPage = () => {
                                     onChange={(e) =>
                                         setDescription(e.target.value)
                                     }
-                                    placeholder="선택 사항: 설문에 대한 설명을 입력하세요"
+                                    placeholder="설문에 대한 간단한 설명을 입력하세요"
                                 />
                             </Form.Group>
                         </Stack>
@@ -294,29 +310,37 @@ export const FormBuilderPage = () => {
                 </Card>
 
                 <section>
-                    <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
                         <div className="d-flex align-items-center gap-2">
-                            <h2 className="h6 mb-0">질문</h2>
-                            <Badge bg="secondary" pill>
+                            <h2 className="h5 mb-0 fw-semibold">질문 목록</h2>
+                            <Badge bg="primary" pill className="px-3">
                                 {questions.length}
                             </Badge>
                         </div>
                         <Button
                             type="button"
-                            size="sm"
-                            variant="outline-primary"
+                            size="md"
+                            variant="primary"
                             onClick={handleAddQuestion}
+                            className="d-flex align-items-center gap-2"
                         >
-                            + 질문 추가
+                            <span>➕</span>
+                            <span>질문 추가</span>
                         </Button>
                     </div>
 
                     {!hasQuestions && (
-                        <p className="text-muted small mb-2">
-                            아직 추가된 질문이 없습니다.{" "}
-                            <strong>질문 추가</strong> 버튼을 눌러 첫 번째
-                            질문을 만들어보세요.
-                        </p>
+                        <Alert
+                            variant="info"
+                            className="d-flex align-items-center gap-2"
+                        >
+                            <span>💡</span>
+                            <span>
+                                아직 추가된 질문이 없습니다.{" "}
+                                <strong>질문 추가</strong> 버튼을 눌러 첫 번째
+                                질문을 만들어보세요.
+                            </span>
+                        </Alert>
                     )}
 
                     <Stack gap={3}>
@@ -327,27 +351,60 @@ export const FormBuilderPage = () => {
                                 question.type === "DROPDOWN";
 
                             return (
-                                <Card key={question.id} className="shadow-sm">
-                                    <Card.Body>
-                                        <div className="d-flex justify-content-between align-items-center mb-2">
-                                            <span className="text-muted small">
+                                <Card
+                                    key={question.id}
+                                    className="border-0 shadow-sm"
+                                >
+                                    <Card.Body className="p-4">
+                                        <div className="d-flex justify-content-between align-items-start mb-3">
+                                            <Badge
+                                                bg="secondary"
+                                                className="mb-2"
+                                            >
                                                 질문 {index + 1}
-                                            </span>
-                                            <div className="d-flex align-items-center gap-2">
-                                                <Form.Check
-                                                    type="switch"
-                                                    id={`required-${question.id}`}
-                                                    label="필수"
-                                                    checked={question.required}
-                                                    onChange={() =>
-                                                        handleToggleRequired(
+                                            </Badge>
+                                            <Form.Check
+                                                type="switch"
+                                                id={`required-${question.id}`}
+                                                label="필수"
+                                                checked={question.required}
+                                                onChange={() =>
+                                                    handleToggleRequired(
+                                                        question.id,
+                                                    )
+                                                }
+                                                className="text-danger"
+                                            />
+                                        </div>
+
+                                        <Stack gap={3}>
+                                            <Form.Group>
+                                                <Form.Label className="fw-semibold">
+                                                    질문 제목
+                                                </Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    value={
+                                                        question.title ===
+                                                        "제목 없는 질문"
+                                                            ? ""
+                                                            : question.title
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleChangeQuestionTitle(
                                                             question.id,
+                                                            e.target.value,
                                                         )
                                                     }
-                                                    className="small"
+                                                    placeholder="질문을 입력하세요"
                                                 />
+                                            </Form.Group>
+
+                                            <Form.Group>
+                                                <Form.Label className="fw-semibold">
+                                                    질문 유형
+                                                </Form.Label>
                                                 <Form.Select
-                                                    size="sm"
                                                     value={question.type}
                                                     onChange={(e) =>
                                                         handleChangeQuestionType(
@@ -374,21 +431,7 @@ export const FormBuilderPage = () => {
                                                         </option>
                                                     ))}
                                                 </Form.Select>
-                                            </div>
-                                        </div>
-
-                                        <Stack gap={2}>
-                                            <Form.Control
-                                                type="text"
-                                                value={question.title}
-                                                onChange={(e) =>
-                                                    handleChangeQuestionTitle(
-                                                        question.id,
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                placeholder="질문 제목을 입력하세요"
-                                            />
+                                            </Form.Group>
 
                                             {isOptionType && (
                                                 <Stack gap={1}>
@@ -518,18 +561,22 @@ export const FormBuilderPage = () => {
                                             )}
                                         </Stack>
                                     </Card.Body>
-                                    <Card.Footer className="text-end bg-transparent border-0 pt-0">
-                                        <Button
-                                            variant="outline-danger"
-                                            size="sm"
-                                            onClick={() =>
-                                                handleRemoveQuestion(
-                                                    question.id,
-                                                )
-                                            }
-                                        >
-                                            질문 삭제
-                                        </Button>
+                                    <Card.Footer className="bg-light border-0 p-3">
+                                        <div className="d-flex justify-content-end">
+                                            <Button
+                                                variant="outline-danger"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleRemoveQuestion(
+                                                        question.id,
+                                                    )
+                                                }
+                                                className="d-flex align-items-center gap-2"
+                                            >
+                                                <span>🗑️</span>
+                                                <span>질문 삭제</span>
+                                            </Button>
+                                        </div>
                                     </Card.Footer>
                                 </Card>
                             );
@@ -538,31 +585,47 @@ export const FormBuilderPage = () => {
                 </section>
 
                 {error && (
-                    <div className="alert alert-danger" role="alert">
-                        {error}
-                    </div>
+                    <Alert
+                        variant="danger"
+                        className="d-flex align-items-center gap-2"
+                    >
+                        <span>⚠️</span>
+                        <span>{error}</span>
+                    </Alert>
                 )}
 
-                <div className="mt-3">
-                    <Stack direction="horizontal" gap={2}>
-                        <Button type="submit" disabled={submitting}>
-                            {submitting
-                                ? isEditMode
-                                    ? "수정 중..."
-                                    : "생성 중..."
-                                : isEditMode
-                                ? "수정 완료"
-                                : "폼 생성"}
-                        </Button>
-                        <Button
-                            variant="outline-secondary"
-                            onClick={() => navigate("/forms")}
-                            disabled={submitting}
+                <Card className="border-0 shadow-sm bg-light">
+                    <Card.Body className="p-4">
+                        <Stack
+                            direction="horizontal"
+                            gap={3}
+                            className="justify-content-end"
                         >
-                            취소
-                        </Button>
-                    </Stack>
-                </div>
+                            <Button
+                                variant="outline-secondary"
+                                onClick={() => navigate("/forms")}
+                                disabled={submitting}
+                                size="lg"
+                            >
+                                취소
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={submitting}
+                                size="lg"
+                                className="px-4"
+                            >
+                                {submitting
+                                    ? isEditMode
+                                        ? "수정 중..."
+                                        : "생성 중..."
+                                    : isEditMode
+                                    ? "✔️ 수정 완료"
+                                    : "✨ 폼 생성"}
+                            </Button>
+                        </Stack>
+                    </Card.Body>
+                </Card>
             </Stack>
         </section>
     );

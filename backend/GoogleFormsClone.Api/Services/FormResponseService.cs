@@ -181,7 +181,8 @@ public class FormResponseService : IFormResponseService
 
     private bool IsOptionType(QuestionType type)
     {
-        return type == QuestionType.MULTIPLE_CHOICE ||
+        return type == QuestionType.SINGLE_CHOICE ||
+               type == QuestionType.MULTIPLE_CHOICE ||
                type == QuestionType.CHECKBOXES ||
                type == QuestionType.DROPDOWN;
     }

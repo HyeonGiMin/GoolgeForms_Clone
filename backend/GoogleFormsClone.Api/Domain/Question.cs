@@ -5,6 +5,7 @@ public enum QuestionType
 {
     SHORT_TEXT,
     LONG_TEXT,
+    SINGLE_CHOICE,
     MULTIPLE_CHOICE,
     CHECKBOXES,
     DROPDOWN,

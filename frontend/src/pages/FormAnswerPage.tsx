@@ -123,6 +123,7 @@ export const FormAnswerPage = () => {
 
             const answer = answers.get(q.id);
             const isOptionType =
+                q.type === "SINGLE_CHOICE" ||
                 q.type === "MULTIPLE_CHOICE" ||
                 q.type === "CHECKBOXES" ||
                 q.type === "DROPDOWN";
@@ -200,12 +201,16 @@ export const FormAnswerPage = () => {
 
     if (!form) {
         return (
-            <section className="p-4">
-                <div className="alert alert-danger">
-                    설문을 찾을 수 없습니다.
-                </div>
+            <section className="py-5">
+                <Alert
+                    variant="danger"
+                    className="d-flex align-items-center gap-2"
+                >
+                    <span>⚠️</span>
+                    <span>설문을 찾을 수 없습니다.</span>
+                </Alert>
                 <Button variant="secondary" onClick={() => navigate("/forms")}>
-                    돌아가기
+                    ← 돌아가기
                 </Button>
             </section>
         );
@@ -213,35 +218,47 @@ export const FormAnswerPage = () => {
 
     if (submitSuccess) {
         return (
-            <section className="p-4">
-                <div className="d-flex flex-column justify-content-center align-items-center min-vh-100">
-                    <div className="text-center" style={{ maxWidth: "500px" }}>
-                        <div className="mb-4">
-                            <i
-                                className="bi bi-check-circle-fill"
-                                style={{ fontSize: "4rem", color: "#28a745" }}
-                            />
-                        </div>
-                        <h2 className="mb-3">응답이 제출되었습니다!</h2>
-                        {form.confirmationMessage && (
-                            <Card className="mb-4 border-success">
-                                <Card.Body>
+            <section className="py-5">
+                <div className="d-flex flex-column justify-content-center align-items-center min-vh-75">
+                    <Card
+                        className="border-0 shadow-lg text-center"
+                        style={{ maxWidth: "600px" }}
+                    >
+                        <Card.Body className="p-5">
+                            <div className="mb-4">
+                                <div
+                                    style={{
+                                        fontSize: "5rem",
+                                        color: "#4caf50",
+                                        animation: "scaleIn 0.5s ease-out",
+                                    }}
+                                >
+                                    ✅
+                                </div>
+                            </div>
+                            <h2 className="mb-3 fw-bold">
+                                응답이 제출되었습니다!
+                            </h2>
+                            {form.confirmationMessage && (
+                                <Alert variant="success" className="mb-4">
                                     <p className="mb-0">
                                         {form.confirmationMessage}
                                     </p>
-                                </Card.Body>
-                            </Card>
-                        )}
-                        <p className="text-muted mb-4">
-                            잠시 후 설문 목록으로 이동합니다...
-                        </p>
-                        <Button
-                            variant="primary"
-                            onClick={() => navigate("/forms")}
-                        >
-                            지금 이동
-                        </Button>
-                    </div>
+                                </Alert>
+                            )}
+                            <p className="text-muted mb-4">
+                                응답해 주셔서 감사합니다. 잠시 후 설문 목록으로
+                                이동합니다...
+                            </p>
+                            <Button
+                                variant="primary"
+                                size="lg"
+                                onClick={() => navigate("/forms")}
+                            >
+                                지금 이동
+                            </Button>
+                        </Card.Body>
+                    </Card>
                 </div>
             </section>
         );
@@ -249,25 +266,38 @@ export const FormAnswerPage = () => {
 
     return (
         <section
-            className="p-4"
-            style={{ maxWidth: "800px", margin: "0 auto" }}
+            className="py-4"
+            style={{ maxWidth: "900px", margin: "0 auto" }}
         >
-            <header className="mb-4">
-                <h1 className="h3 mb-2">{form.title}</h1>
-                {form.description && (
-                    <p className="text-muted">{form.description}</p>
-                )}
-            </header>
+            <Card className="border-0 shadow-sm mb-4">
+                <Card.Body className="p-4 p-md-5">
+                    <h1 className="h2 mb-3 fw-bold">{form.title}</h1>
+                    {form.description && (
+                        <p className="text-muted lead">{form.description}</p>
+                    )}
+                </Card.Body>
+            </Card>
 
-            {error && <Alert variant="danger">{error}</Alert>}
+            {error && (
+                <Alert
+                    variant="danger"
+                    className="d-flex align-items-center gap-2"
+                >
+                    <span>⚠️</span>
+                    <span>{error}</span>
+                </Alert>
+            )}
 
-            <Stack gap={3} as="form" onSubmit={handleSubmit} className="mb-4">
+            <Stack gap={4} as="form" onSubmit={handleSubmit} className="mb-4">
                 {form.questions.map((question, index) => (
-                    <Card key={question.id} className="shadow-sm">
-                        <Card.Body>
+                    <Card key={question.id} className="border-0 shadow-sm">
+                        <Card.Body className="p-4">
                             <div className="mb-3">
-                                <h5 className="mb-1">
-                                    {index + 1}. {question.title}
+                                <h5 className="mb-2 fw-semibold">
+                                    <Badge bg="secondary" className="me-2">
+                                        Q{index + 1}
+                                    </Badge>
+                                    {question.title}
                                     {question.required && (
                                         <Badge bg="danger" className="ms-2">
                                             필수
@@ -294,17 +324,19 @@ export const FormAnswerPage = () => {
                     </Card>
                 ))}
 
-                <div className="mt-4">
-                    <Button
-                        type="submit"
-                        variant="primary"
-                        size="lg"
-                        disabled={submitting}
-                        className="w-100"
-                    >
-                        {submitting ? "제출 중..." : "응답 제출"}
-                    </Button>
-                </div>
+                <Card className="border-0 shadow-sm bg-light">
+                    <Card.Body className="p-4 text-center">
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            size="lg"
+                            disabled={submitting}
+                            className="px-5"
+                        >
+                            {submitting ? "⏳ 제출 중..." : "✅ 응답 제출"}
+                        </Button>
+                    </Card.Body>
+                </Card>
             </Stack>
         </section>
     );
@@ -369,8 +401,8 @@ function QuestionRenderer({
         );
     }
 
-    // 객관식
-    if (question.type === "MULTIPLE_CHOICE") {
+    // 객관식 (단일 선택)
+    if (question.type === "SINGLE_CHOICE") {
         return (
             <Stack gap={2}>
                 {question.options.map((option) => (
@@ -389,8 +421,8 @@ function QuestionRenderer({
         );
     }
 
-    // 체크박스
-    if (question.type === "CHECKBOXES") {
+    // 다중 선택
+    if (question.type === "MULTIPLE_CHOICE") {
         return (
             <Stack gap={2}>
                 {question.options.map((option) => (
