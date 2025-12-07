@@ -45,7 +45,8 @@ public class FormService(IFormRepository formRepository) : IFormService
             form.ShowProgressBar,
             form.CreatedAtUtc,
             form.UpdatedAtUtc,
-            questionDtos
+            questionDtos,
+            form.AlertKeywords
         );
     }
 
@@ -55,6 +56,7 @@ public class FormService(IFormRepository formRepository) : IFormService
         {
             Title = request.Title,
             Description = request.Description,
+            AlertKeywords = request.AlertKeywords?.ToList() ?? [],
             Questions = request.Questions
                 .Select(q => new Question
                 {
@@ -87,6 +89,7 @@ public class FormService(IFormRepository formRepository) : IFormService
         existing.Description = request.Description;
         existing.ConfirmationMessage = request.ConfirmationMessage;
         existing.ShowProgressBar = request.ShowProgressBar;
+        existing.AlertKeywords = request.AlertKeywords?.ToList() ?? [];
         existing.Questions = request.Questions
             .Select(q => new Question
             {
@@ -126,7 +129,8 @@ public class FormService(IFormRepository formRepository) : IFormService
             updated.ShowProgressBar,
             updated.CreatedAtUtc,
             updated.UpdatedAtUtc,
-            questionDtos
+            questionDtos,
+            updated.AlertKeywords
         );
     }
 

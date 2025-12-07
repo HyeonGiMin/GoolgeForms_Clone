@@ -11,7 +11,15 @@ import {
     type QuestionStatisticsDto,
 } from "../api/formsApi";
 import { QuestionStatsCard } from "../components/StatisticsChart";
-import { Badge, Button, Nav, Spinner, Tab } from "react-bootstrap";
+import {
+    Badge,
+    Button,
+    Nav,
+    Spinner,
+    Tab,
+    Toast,
+    ToastContainer,
+} from "react-bootstrap";
 
 export const FormResponsesPage = () => {
     const navigate = useNavigate();
@@ -22,6 +30,8 @@ export const FormResponsesPage = () => {
     const [statistics, setStatistics] = useState<QuestionStatisticsDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showAlertToast, setShowAlertToast] = useState(false);
+    const [alertCount, setAlertCount] = useState(0);
     const [expandedResponseId, setExpandedResponseId] = useState<string | null>(
         null,
     );
@@ -46,6 +56,25 @@ export const FormResponsesPage = () => {
                 setResponses(responsesData);
                 setStatistics(statisticsData);
                 setError(null);
+
+                // 알림 키워드가 포함된 답변 확인 (Toast로 표시)
+                const alertKeywords = formData.alertKeywords || [];
+                if (alertKeywords.length > 0) {
+                    const count = responsesData.filter((response) =>
+                        response.answers.some((answer) => {
+                            if (!answer.answer) return false;
+                            const lowerText = answer.answer.toLowerCase();
+                            return alertKeywords.some((keyword) =>
+                                lowerText.includes(keyword.toLowerCase()),
+                            );
+                        }),
+                    ).length;
+
+                    if (count > 0) {
+                        setAlertCount(count);
+                        setShowAlertToast(true);
+                    }
+                }
             } catch (err) {
                 console.error(err);
                 setError("데이터를 불러오지 못했습니다.");
@@ -99,6 +128,30 @@ export const FormResponsesPage = () => {
 
     return (
         <section className="p-4">
+            <ToastContainer
+                position="top-end"
+                className="p-3"
+                style={{ zIndex: 9999 }}
+            >
+                <Toast
+                    show={showAlertToast}
+                    onClose={() => setShowAlertToast(false)}
+                    delay={5000}
+                    autohide
+                    bg="warning"
+                >
+                    <Toast.Header>
+                        <strong className="me-auto">⚠️ 알림</strong>
+                    </Toast.Header>
+                    <Toast.Body>
+                        알림 키워드가 포함된 답변이{" "}
+                        <strong>{alertCount}건</strong> 있습니다.
+                        <br />
+                        응답 보기 탭에서 확인하세요.
+                    </Toast.Body>
+                </Toast>
+            </ToastContainer>
+
             <header className="mb-4">
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -228,6 +281,7 @@ export const FormResponsesPage = () => {
                                         expandedResponseId={expandedResponseId}
                                         onToggleExpand={setExpandedResponseId}
                                         onDelete={handleDeleteResponse}
+                                        form={form}
                                     />
                                 )}
                             </>
@@ -239,6 +293,13 @@ export const FormResponsesPage = () => {
     );
 
     function exportResponses() {
+        if (
+            !confirm(
+                `${responses.length}개의 응답을 CSV 파일로 내보내시겠습니까?`,
+            )
+        ) {
+            return;
+        }
         const csvData = convertToCSV(responses, form?.questions || []);
         downloadCSV(csvData, `${form?.title || "responses"}.csv`);
     }
@@ -311,6 +372,16 @@ interface ResponseByQuestionProps {
 const ResponseByQuestion = ({ responses, form }: ResponseByQuestionProps) => {
     if (!form) return null;
 
+    const alertKeywords = form.alertKeywords || [];
+
+    const hasAlertKeyword = (text: string): boolean => {
+        if (alertKeywords.length === 0) return false;
+        const lowerText = text.toLowerCase();
+        return alertKeywords.some((keyword) =>
+            lowerText.includes(keyword.toLowerCase()),
+        );
+    };
+
     return (
         <div className="row g-3">
             {form.questions.map((question) => (
@@ -325,10 +396,18 @@ const ResponseByQuestion = ({ responses, form }: ResponseByQuestionProps) => {
                                     const answer = response.answers.find(
                                         (a) => a.questionId === question.id,
                                     );
+                                    const hasAlert =
+                                        answer?.answer &&
+                                        hasAlertKeyword(answer.answer);
+
                                     return (
                                         <div
                                             key={response.id}
-                                            className="list-group-item d-flex justify-content-between align-items-start"
+                                            className={`list-group-item d-flex justify-content-between align-items-start ${
+                                                hasAlert
+                                                    ? "border-warning border-2 bg-warning bg-opacity-10"
+                                                    : ""
+                                            }`}
                                         >
                                             <div className="flex-grow-1">
                                                 {answer?.selectedOptions &&
@@ -349,10 +428,21 @@ const ResponseByQuestion = ({ responses, form }: ResponseByQuestionProps) => {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <p className="mb-0 text-muted">
-                                                        {answer?.answer ||
-                                                            "응답 없음"}
-                                                    </p>
+                                                    <div>
+                                                        <p className="mb-0 text-muted">
+                                                            {answer?.answer ||
+                                                                "응답 없음"}
+                                                        </p>
+                                                        {hasAlert && (
+                                                            <Badge
+                                                                bg="warning"
+                                                                className="mt-2"
+                                                            >
+                                                                ⚠️ 알림 키워드
+                                                                포함
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                             <small className="text-muted ms-2">
@@ -377,6 +467,7 @@ interface ResponseIndividualProps {
     expandedResponseId: string | null;
     onToggleExpand: (id: string | null) => void;
     onDelete: (id: string) => void;
+    form: FormDetail | null;
 }
 
 const ResponseIndividual = ({
@@ -384,80 +475,134 @@ const ResponseIndividual = ({
     expandedResponseId,
     onToggleExpand,
     onDelete,
+    form,
 }: ResponseIndividualProps) => {
+    const alertKeywords = form?.alertKeywords || [];
+
+    const hasAlertKeyword = (text: string): boolean => {
+        if (alertKeywords.length === 0) return false;
+        const lowerText = text.toLowerCase();
+        return alertKeywords.some((keyword) =>
+            lowerText.includes(keyword.toLowerCase()),
+        );
+    };
+
     return (
         <div className="list-group">
-            {responses.map((response, idx) => (
-                <div key={response.id} className="list-group-item">
-                    <div className="d-flex justify-content-between align-items-start">
-                        <div className="flex-grow-1">
-                            <h6 className="mb-1">응답 #{idx + 1}</h6>
-                            <small className="text-muted">
-                                {new Date(response.createdAt).toLocaleString(
-                                    "ko-KR",
-                                )}
-                            </small>
-                        </div>
-                        <div className="btn-group btn-group-sm">
-                            <Button
-                                size="sm"
-                                variant="outline-primary"
-                                onClick={() =>
-                                    onToggleExpand(
-                                        expandedResponseId === response.id
-                                            ? null
-                                            : response.id,
-                                    )
-                                }
-                            >
-                                {expandedResponseId === response.id
-                                    ? "접기"
-                                    : "보기"}
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="outline-danger"
-                                onClick={() => onDelete(response.id)}
-                            >
-                                삭제
-                            </Button>
-                        </div>
-                    </div>
+            {responses.map((response, idx) => {
+                const hasAlerts = response.answers.some(
+                    (answer) => answer.answer && hasAlertKeyword(answer.answer),
+                );
 
-                    {expandedResponseId === response.id && (
-                        <div className="mt-3 pt-3 border-top">
-                            {response.answers.map((answer) => (
-                                <div key={answer.questionId} className="mb-3">
-                                    <h6 className="mb-2">
-                                        {answer.questionTitle}
-                                    </h6>
-                                    {answer.selectedOptions &&
-                                    answer.selectedOptions.length > 0 ? (
-                                        <div>
-                                            {answer.selectedOptions.map(
-                                                (opt) => (
+                return (
+                    <div
+                        key={response.id}
+                        className={`list-group-item ${
+                            hasAlerts
+                                ? "border-warning border-2 bg-warning bg-opacity-10"
+                                : ""
+                        }`}
+                    >
+                        <div className="d-flex justify-content-between align-items-start">
+                            <div className="flex-grow-1">
+                                <h6 className="mb-1">
+                                    응답 #{idx + 1}
+                                    {hasAlerts && (
+                                        <Badge bg="warning" className="ms-2">
+                                            ⚠️ 알림
+                                        </Badge>
+                                    )}
+                                </h6>
+                                <small className="text-muted">
+                                    {new Date(
+                                        response.createdAt,
+                                    ).toLocaleString("ko-KR")}
+                                </small>
+                            </div>
+                            <div className="btn-group btn-group-sm">
+                                <Button
+                                    size="sm"
+                                    variant="outline-primary"
+                                    onClick={() =>
+                                        onToggleExpand(
+                                            expandedResponseId === response.id
+                                                ? null
+                                                : response.id,
+                                        )
+                                    }
+                                >
+                                    {expandedResponseId === response.id
+                                        ? "접기"
+                                        : "보기"}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline-danger"
+                                    onClick={() => onDelete(response.id)}
+                                >
+                                    삭제
+                                </Button>
+                            </div>
+                        </div>
+
+                        {expandedResponseId === response.id && (
+                            <div className="mt-3 pt-3 border-top">
+                                {response.answers.map((answer) => {
+                                    const hasAlert =
+                                        answer.answer &&
+                                        hasAlertKeyword(answer.answer);
+
+                                    return (
+                                        <div
+                                            key={answer.questionId}
+                                            className={`mb-3 p-2 rounded ${
+                                                hasAlert
+                                                    ? "bg-warning bg-opacity-25"
+                                                    : ""
+                                            }`}
+                                        >
+                                            <h6 className="mb-2">
+                                                {answer.questionTitle}
+                                                {hasAlert && (
                                                     <Badge
-                                                        key={`${answer.questionId}-${opt}`}
-                                                        bg="light"
-                                                        text="dark"
-                                                        className="me-2 mb-2"
+                                                        bg="warning"
+                                                        className="ms-2"
                                                     >
-                                                        {opt}
+                                                        ⚠️ 알림 키워드 포함
                                                     </Badge>
-                                                ),
+                                                )}
+                                            </h6>
+                                            {answer.selectedOptions &&
+                                            answer.selectedOptions.length >
+                                                0 ? (
+                                                <div>
+                                                    {answer.selectedOptions.map(
+                                                        (opt) => (
+                                                            <Badge
+                                                                key={`${answer.questionId}-${opt}`}
+                                                                bg="light"
+                                                                text="dark"
+                                                                className="me-2 mb-2"
+                                                            >
+                                                                {opt}
+                                                            </Badge>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p className="text-muted mb-0">
+                                                    {answer.answer ||
+                                                        "응답 없음"}
+                                                </p>
                                             )}
                                         </div>
-                                    ) : (
-                                        <p className="text-muted">
-                                            {answer.answer || "응답 없음"}
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            ))}
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 };

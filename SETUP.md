@@ -62,6 +62,13 @@ dotnet run
 dotnet watch run
 ```
 
+### Backend 핫 리로드(Hot Reload) 세부
+
+-   `dotnet watch run` 으로 실행하면 C# 코드 변경 시 자동 빌드/재시작 + Blazor/razor 미사용 시 API도 자동 반영됩니다.
+-   변경 후 수 초 내 리로드되며, 로그에 `watch : Hot reload enabled.`가 보이면 정상 동작 중입니다.
+-   포트 충돌 시 `ASPNETCORE_URLS`로 임시 포트 지정 예: `ASPNETCORE_URLS=http://localhost:5050 dotnet watch run`.
+-   VS Code F5 디버깅 시에도 `dotnet watch run`을 PreLaunchTask로 설정 가능하지만, 단순 터미널 실행이 가장 빠릅니다.
+
 **실행 후 접속 주소:**
 
 -   API: `http://localhost:15025`

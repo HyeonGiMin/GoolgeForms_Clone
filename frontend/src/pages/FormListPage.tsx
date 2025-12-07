@@ -1,6 +1,6 @@
 // FormListPage.tsx - 사용자가 만든 폼 목록을 보여주는 페이지
 import { useEffect, useState } from "react";
-import { fetchForms, type FormSummary } from "../api/formsApi";
+import { fetchForms, deleteForm, type FormSummary } from "../api/formsApi";
 import { Alert, Button, Card, Col, Row, Spinner, Stack } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -8,6 +8,7 @@ export const FormListPage = () => {
     const [forms, setForms] = useState<FormSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -31,6 +32,22 @@ export const FormListPage = () => {
         navigator.clipboard.writeText(shareUrl);
         setCopiedId(formId);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const handleDelete = async (formId: string) => {
+        if (!confirm("이 폼을 삭제하시겠습니까? 모든 응답도 함께 삭제됩니다."))
+            return;
+
+        try {
+            setDeletingId(formId);
+            await deleteForm(formId);
+            setForms((prev) => prev.filter((f) => f.id !== formId));
+        } catch (err) {
+            console.error(err);
+            alert("폼 삭제에 실패했습니다. 다시 시도해주세요.");
+        } finally {
+            setDeletingId(null);
+        }
     };
 
     return (
@@ -126,6 +143,19 @@ export const FormListPage = () => {
                                                 </Button>
                                             </Link>
                                         </Stack>
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            className="w-100"
+                                            disabled={deletingId === form.id}
+                                            onClick={() =>
+                                                handleDelete(form.id)
+                                            }
+                                        >
+                                            {deletingId === form.id
+                                                ? "삭제 중..."
+                                                : "🗑️ 폼 삭제"}
+                                        </Button>
                                         <Button
                                             variant={
                                                 copiedId === form.id

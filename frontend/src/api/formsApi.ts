@@ -32,6 +32,7 @@ export type FormDetail = {
     questions: Question[];
     confirmationMessage?: string | null;
     showProgressBar?: boolean;
+    alertKeywords?: string[];
 };
 
 export type QuestionType =
@@ -62,12 +63,14 @@ export type CreateFormRequest = {
     title: string;
     description?: string;
     questions: CreateFormQuestionRequest[];
+    alertKeywords?: string[];
 };
 
 export type UpdateFormRequest = {
     title: string;
     description?: string;
     questions: UpdateFormQuestionRequest[];
+    alertKeywords?: string[];
 };
 
 export async function fetchForms(): Promise<FormSummary[]> {

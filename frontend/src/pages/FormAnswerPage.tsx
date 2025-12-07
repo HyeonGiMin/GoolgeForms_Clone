@@ -151,13 +151,14 @@ export const FormAnswerPage = () => {
             const payload = {
                 answers: Array.from(answers.values()).map(
                     (ans): SubmitAnswerDto => {
+                        const question = form.questions.find(
+                            (q) => q.id === ans.questionId,
+                        );
                         const isOptionType =
-                            form.questions.find((q) => q.id === ans.questionId)
-                                ?.type === "MULTIPLE_CHOICE" ||
-                            form.questions.find((q) => q.id === ans.questionId)
-                                ?.type === "CHECKBOXES" ||
-                            form.questions.find((q) => q.id === ans.questionId)
-                                ?.type === "DROPDOWN";
+                            question?.type === "SINGLE_CHOICE" ||
+                            question?.type === "MULTIPLE_CHOICE" ||
+                            question?.type === "CHECKBOXES" ||
+                            question?.type === "DROPDOWN";
 
                         return {
                             questionId: ans.questionId,
@@ -173,11 +174,7 @@ export const FormAnswerPage = () => {
             await submitResponse(id, payload);
             setSubmitSuccess(true);
 
-            // confirmationMessage가 있으면 표시 후 이동, 없으면 바로 이동
-            const delay = form.confirmationMessage ? 5000 : 3000;
-            setTimeout(() => {
-                navigate("/forms");
-            }, delay);
+            // 제출 완료 후 현재 페이지에 머무름 (자동 이동 없음)
         } catch (err) {
             console.error(err);
             setError("응답을 제출하지 못했습니다. 다시 시도해주세요.");
@@ -246,17 +243,9 @@ export const FormAnswerPage = () => {
                                     </p>
                                 </Alert>
                             )}
-                            <p className="text-muted mb-4">
-                                응답해 주셔서 감사합니다. 잠시 후 설문 목록으로
-                                이동합니다...
+                            <p className="text-muted mb-0">
+                                응답해 주셔서 감사합니다.
                             </p>
-                            <Button
-                                variant="primary"
-                                size="lg"
-                                onClick={() => navigate("/forms")}
-                            >
-                                지금 이동
-                            </Button>
                         </Card.Body>
                     </Card>
                 </div>
@@ -401,7 +390,7 @@ function QuestionRenderer({
         );
     }
 
-    // 객관식 (단일 선택)
+    // 객관식 (단일 선택) - 라디오 버튼
     if (question.type === "SINGLE_CHOICE") {
         return (
             <Stack gap={2}>
@@ -413,7 +402,10 @@ function QuestionRenderer({
                         id={`option-${option.id}`}
                         label={option.label}
                         value={option.label}
-                        checked={answer?.selectedOptions.includes(option.label)}
+                        checked={
+                            answer?.selectedOptions?.includes(option.label) ??
+                            false
+                        }
                         onChange={() => onOptionChange(option.label, false)}
                     />
                 ))}
@@ -422,7 +414,7 @@ function QuestionRenderer({
     }
 
     // 다중 선택
-    if (question.type === "MULTIPLE_CHOICE") {
+    if (question.type === "MULTIPLE_CHOICE" || question.type === "CHECKBOXES") {
         return (
             <Stack gap={2}>
                 {question.options.map((option) => (
@@ -432,7 +424,10 @@ function QuestionRenderer({
                         id={`option-${option.id}`}
                         label={option.label}
                         value={option.label}
-                        checked={answer?.selectedOptions.includes(option.label)}
+                        checked={
+                            answer?.selectedOptions?.includes(option.label) ??
+                            false
+                        }
                         onChange={() => onOptionChange(option.label, true)}
                     />
                 ))}
@@ -444,7 +439,7 @@ function QuestionRenderer({
     if (question.type === "DROPDOWN") {
         return (
             <Form.Select
-                value={answer?.selectedOptions[0] || ""}
+                value={answer?.selectedOptions?.[0] || ""}
                 onChange={(e) => {
                     if (e.target.value) {
                         onOptionChange(e.target.value, false);

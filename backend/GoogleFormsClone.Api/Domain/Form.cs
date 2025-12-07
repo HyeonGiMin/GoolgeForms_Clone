@@ -23,5 +23,8 @@ public class Form
     public DateTime? UpdatedAtUtc { get; set; }
 
     public List<Question> Questions { get; set; } = [];
+
+    [BsonElement("alertKeywords")]
+    public List<string> AlertKeywords { get; set; } = [];
 }
 

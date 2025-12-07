@@ -16,7 +16,8 @@ public record FormDetailDto(
     bool ShowProgressBar,
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc,
-    IReadOnlyList<QuestionDto> Questions
+    IReadOnlyList<QuestionDto> Questions,
+    IReadOnlyList<string>? AlertKeywords
 );
 
 public record QuestionOptionDto(
@@ -49,7 +50,8 @@ public record UpdateQuestionRequestDto(
 public record CreateFormRequestDto(
     string Title,
     string? Description,
-    IReadOnlyList<CreateQuestionRequestDto> Questions
+    IReadOnlyList<CreateQuestionRequestDto> Questions,
+    IReadOnlyList<string>? AlertKeywords
 );
 
 public record UpdateFormRequestDto(
@@ -57,6 +59,7 @@ public record UpdateFormRequestDto(
     string? Description,
     string? ConfirmationMessage,
     bool ShowProgressBar,
-    IReadOnlyList<UpdateQuestionRequestDto> Questions
+    IReadOnlyList<UpdateQuestionRequestDto> Questions,
+    IReadOnlyList<string>? AlertKeywords
 );
 

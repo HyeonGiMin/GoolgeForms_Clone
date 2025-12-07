@@ -133,7 +133,7 @@ public class FormResponseService : IFormResponseService
             return null;
 
         var optionCounts = new Dictionary<string, int>();
-        var totalCount = 0;
+        var totalResponses = answers.Count;
 
         foreach (var answer in answers)
         {
@@ -144,12 +144,11 @@ public class FormResponseService : IFormResponseService
                     if (!optionCounts.ContainsKey(option))
                         optionCounts[option] = 0;
                     optionCounts[option]++;
-                    totalCount++;
                 }
             }
         }
 
-        if (totalCount == 0)
+        if (totalResponses == 0)
             return question.Options.Select(o => new OptionStatisticsDto(
                 OptionLabel: o.Label,
                 Count: 0,
@@ -159,7 +158,7 @@ public class FormResponseService : IFormResponseService
         return question.Options.Select(o =>
         {
             var count = optionCounts.TryGetValue(o.Label, out var c) ? c : 0;
-            var percentage = totalCount > 0 ? (count * 100.0) / totalCount : 0;
+            var percentage = totalResponses > 0 ? (count * 100.0) / totalResponses : 0;
             return new OptionStatisticsDto(
                 OptionLabel: o.Label,
                 Count: count,

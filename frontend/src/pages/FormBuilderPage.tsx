@@ -18,6 +18,8 @@ import {
     Form,
     Stack,
     Spinner,
+    Tab,
+    Tabs,
 } from "react-bootstrap";
 
 type QuestionOption = {
@@ -55,6 +57,8 @@ export const FormBuilderPage = () => {
     const [loading, setLoading] = useState(isEditMode);
     const [error, setError] = useState<string | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [alertKeywords, setAlertKeywords] = useState<string[]>([]);
+    const [newKeyword, setNewKeyword] = useState("");
 
     // 편집 모드: 기존 폼 데이터 로드
     useEffect(() => {
@@ -65,6 +69,7 @@ export const FormBuilderPage = () => {
                     const form = await fetchFormById(id);
                     setTitle(form.title);
                     setDescription(form.description || "");
+                    setAlertKeywords(form.alertKeywords || []);
                     setQuestions(
                         form.questions.map((q) => ({
                             id: q.id,
@@ -116,12 +121,18 @@ export const FormBuilderPage = () => {
                     title: title.trim(),
                     description: description.trim() || undefined,
                     questions: questionsPayload as UpdateFormQuestionRequest[],
+                    alertKeywords: alertKeywords
+                        .map((k) => k.trim())
+                        .filter((k) => k.length > 0),
                 });
             } else {
                 await createForm({
                     title: title.trim(),
                     description: description.trim() || undefined,
                     questions: questionsPayload as CreateFormQuestionRequest[],
+                    alertKeywords: alertKeywords
+                        .map((k) => k.trim())
+                        .filter((k) => k.length > 0),
                 });
             }
 
@@ -148,6 +159,19 @@ export const FormBuilderPage = () => {
         };
 
         setQuestions((prev) => [...prev, newQuestion]);
+    };
+
+    const handleAddKeyword = () => {
+        const value = newKeyword.trim();
+        if (!value) return;
+        setAlertKeywords((prev) =>
+            prev.includes(value) ? prev : [...prev, value],
+        );
+        setNewKeyword("");
+    };
+
+    const handleRemoveKeyword = (keyword: string) => {
+        setAlertKeywords((prev) => prev.filter((k) => k !== keyword));
     };
 
     const handleChangeQuestionTitle = (id: string, value: string) => {
@@ -309,6 +333,76 @@ export const FormBuilderPage = () => {
                     </Card.Body>
                 </Card>
 
+                <Card className="border-0 shadow-sm">
+                    <Card.Body className="p-4">
+                        <Tabs defaultActiveKey="keywords" id="alert-tabs">
+                            <Tab eventKey="keywords" title="알림 키워드">
+                                <div className="mt-3">
+                                    <p className="text-muted small mb-3">
+                                        특정 키워드가 텍스트 답변에 포함되면
+                                        알림을 띄웁니다. (폼별로 저장)
+                                    </p>
+                                    <Stack
+                                        direction="horizontal"
+                                        gap={2}
+                                        className="mb-3 flex-wrap"
+                                    >
+                                        <Form.Control
+                                            type="text"
+                                            value={newKeyword}
+                                            onChange={(e) =>
+                                                setNewKeyword(e.target.value)
+                                            }
+                                            placeholder="예: 확인 필요, 민감 키워드"
+                                            style={{ maxWidth: "260px" }}
+                                        />
+                                        <Button
+                                            variant="primary"
+                                            onClick={handleAddKeyword}
+                                        >
+                                            키워드 추가
+                                        </Button>
+                                    </Stack>
+
+                                    {alertKeywords.length === 0 ? (
+                                        <Alert variant="light" className="mb-0">
+                                            아직 등록된 키워드가 없습니다.
+                                            필요한 키워드를 추가하세요.
+                                        </Alert>
+                                    ) : (
+                                        <Stack
+                                            direction="horizontal"
+                                            gap={2}
+                                            className="flex-wrap"
+                                        >
+                                            {alertKeywords.map((keyword) => (
+                                                <Badge
+                                                    key={keyword}
+                                                    bg="secondary"
+                                                    className="d-flex align-items-center gap-2 py-2 px-3"
+                                                >
+                                                    <span>{keyword}</span>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline-light"
+                                                        onClick={() =>
+                                                            handleRemoveKeyword(
+                                                                keyword,
+                                                            )
+                                                        }
+                                                    >
+                                                        ✕
+                                                    </Button>
+                                                </Badge>
+                                            ))}
+                                        </Stack>
+                                    )}
+                                </div>
+                            </Tab>
+                        </Tabs>
+                    </Card.Body>
+                </Card>
+
                 <section>
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
                         <div className="d-flex align-items-center gap-2">
@@ -319,7 +413,6 @@ export const FormBuilderPage = () => {
                         </div>
                         <Button
                             type="button"
-                            size="md"
                             variant="primary"
                             onClick={handleAddQuestion}
                             className="d-flex align-items-center gap-2"
@@ -346,6 +439,7 @@ export const FormBuilderPage = () => {
                     <Stack gap={3}>
                         {questions.map((question, index) => {
                             const isOptionType =
+                                question.type === "SINGLE_CHOICE" ||
                                 question.type === "MULTIPLE_CHOICE" ||
                                 question.type === "CHECKBOXES" ||
                                 question.type === "DROPDOWN";
@@ -443,7 +537,7 @@ export const FormBuilderPage = () => {
                                                             >
                                                                 {/* 질문 타입에 따라 미리보기 아이콘 변경 */}
                                                                 {question.type ===
-                                                                    "MULTIPLE_CHOICE" && (
+                                                                    "SINGLE_CHOICE" && (
                                                                     <Form.Check
                                                                         type="radio"
                                                                         disabled
@@ -451,13 +545,15 @@ export const FormBuilderPage = () => {
                                                                         aria-label="객관식 옵션 미리보기"
                                                                     />
                                                                 )}
-                                                                {question.type ===
-                                                                    "CHECKBOXES" && (
+                                                                {(question.type ===
+                                                                    "MULTIPLE_CHOICE" ||
+                                                                    question.type ===
+                                                                        "CHECKBOXES") && (
                                                                     <Form.Check
                                                                         type="checkbox"
                                                                         disabled
                                                                         className="mb-0"
-                                                                        aria-label="체크박스 옵션 미리보기"
+                                                                        aria-label="다중 선택 옵션 미리보기"
                                                                     />
                                                                 )}
                                                                 {question.type ===
